@@ -24,7 +24,7 @@ class Tank_34:
         self.Tank_surf = pygame.transform.scale(self.Tank_surf,
                                                 (self.Tank_surf.get_width() // 2,
                                                  self.Tank_surf.get_height() // 2)
-                                               )
+                                                )
         self.Tank_rect = pygame.math.Vector2(start_x, start_y)
         self.direction = pygame.math.Vector2(5, 0)
         self.live_tank = 10
@@ -49,7 +49,7 @@ class Tank_34:
             if ignore_wall() == 1:
                 self.direction.rotate_ip(3)
 
-    def rotate_tank(self):
+    def rotate_t(self):
         self.angle = self.direction.angle_to((0, 0))
         self.rotate_tank = pygame.transform.rotate(self.Tank_surf, self.angle)
         sc.blit(self.rotate_tank, self.rotate_tank.get_rect(center=(round(self.Tank_rect.x), round(self.Tank_rect.y))))
@@ -60,7 +60,7 @@ class Bullet:
         self.direction = direction
         self.Bullet_surf = pygame.image.load(picture)
         self.Bullet_surf = pygame.transform.scale(self.Bullet_surf, (
-        self.Bullet_surf.get_width() // 6, self.Bullet_surf.get_height() // 6))
+            self.Bullet_surf.get_width() // 6, self.Bullet_surf.get_height() // 6))
         self.Bullet_rect = pygame.math.Vector2(start_x, start_y)
         self.direction_bullet = pygame.math.Vector2(self.direction, 0)
         self.flshoot = False
@@ -87,20 +87,32 @@ direction = pygame.math.Vector2(5, 0)
 
 def main_area():
     pygame.draw.rect(sc, BLACK, [50, 50, 900, 500], 5)
+    pygame.draw.rect(sc, BLACK, [350, 5, 300, 35])
+
+    button_exit = pygame.font.SysFont('arial', 30)
     live1 = pygame.font.SysFont('arial', 30)
     live2 = pygame.font.SysFont('arial', 30)
+
+    button_menu = button_exit.render(f"EXIT TO MENU", False, WHITE)
     text_live_1 = live1.render(f"live first tank: {Tank1.live_tank}", False, BLACK)
     text_live_2 = live2.render(f"live second tank: {Tank2.live_tank}", False, BLACK)
+    sc.blit(button_menu, (420, 5))
     sc.blit(text_live_1, (50, 10))
     sc.blit(text_live_2, (735, 10))
 
 
 def rules():
     rule1 = pygame.font.SysFont('arial', 30)
-    text1 = rule1.render('Победа достанется сильнейшему', False, BLACK)
-    text2 = rule1.render('Истина победит, и не важно кто при этом был прав', False, BLACK)
+    text1 = rule1.render('Победа будет легендарной', False, BLACK)
+    text2 = rule1.render('Если не ты победишь то враг', False, BLACK)
     sc.fill(WHITE)
     pygame.draw.rect(sc, BLACK, [300, 100, 400, 370], 5)
+    pygame.draw.rect(sc, BLACK, [350, 5, 300, 35])
+
+    button_exit = pygame.font.SysFont('arial', 30)
+    button_menu = button_exit.render(f"EXIT TO MENU", False, WHITE)
+    sc.blit(button_menu, (420, 5))
+
     sc.blit(text1, (320, 120))
     sc.blit(text2, (320, 160))
     pygame.display.update()
@@ -132,27 +144,45 @@ def ignore_wall():
     return False
 
 
-flagmenu = True
-flagrules = False
-
 Tank1 = Tank_34("images/tank_1.jpg", 100, 100, pygame.K_SPACE)
 Bullet1 = Bullet('images/bullet.jpg', 100, 100, direction, pygame.K_SPACE)
 Tank2 = Tank_34('images/tank_2.jpg', 800, 100, pygame.K_e)
 Bullet2 = Bullet('images/bullet.JPG', 800, 100, direction, pygame.K_e)
 
-while True:
 
+def control_area(flagmenu,flaggame,flagrules):
     for event in pygame.event.get():
-
         if event.type == pygame.QUIT:
             exit()
-        if event.type == pygame.MOUSEBUTTONDOWN and 350 <= event.pos[0] <= 650 and 140 <= event.pos[1] <= 190:
+        if event.type == pygame.MOUSEBUTTONDOWN and \
+                350 <= event.pos[0] <= 650 and 380 <= event.pos[1] <= 430 and \
+                flagmenu:
+            if event.button == 1:
+                exit()
+        if event.type == pygame.MOUSEBUTTONDOWN and (flaggame or flagrules) and \
+                350 <= event.pos[0] <= 650 and 5 <= event.pos[1] <= 40:
+            if event.button == 1:
+                flagmenu = True
+                flagrules = False
+                flaggame = False
+        if event.type == pygame.MOUSEBUTTONDOWN and flagmenu and\
+                350 <= event.pos[0] <= 650 and 140 <= event.pos[1] <= 190:
             if event.button == 1:
                 flagmenu = False
-        if event.type == pygame.MOUSEBUTTONDOWN and 350 <= event.pos[0] <= 650 and 300 <= event.pos[1] <= 350:
+                flaggame = True
+        if event.type == pygame.MOUSEBUTTONDOWN and flagmenu and\
+            350 <= event.pos[0] <= 650 and 300 <= event.pos[1] <= 350:
             if event.button == 1:
                 flagrules = True
                 flagmenu = False
+    return flagmenu, flaggame, flagrules
+
+flagrules = False
+flagmenu = True
+flaggame = False
+while True:
+
+    flagmenu, flaggame, flagrules = control_area(flagmenu, flaggame, flagrules)
 
     if flagmenu:
         mainmenu.Drawmenu(sc, FPS)
